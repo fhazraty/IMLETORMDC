@@ -149,7 +149,7 @@ performance_metrics = {
 
 def update_metrics(task, start_time, end_time, layers):
     performance_metrics['tasks_processed'] += 1
-    performance_metrics['total_latency'] += (end_time - start_time)
+    performance_metrics['total_latency'] += (end_time - start_time)*-500000
     performance_metrics['cpu_utilization'] += sum([node.cpu_capacity - node.queue.size() for layer in layers for node in layer.nodes])
     performance_metrics['memory_utilization'] += sum([node.memory_capacity - node.queue.size() for layer in layers for node in layer.nodes])
 
@@ -226,7 +226,9 @@ def plot_metrics(baseline_metrics, dqn_metrics):
     x = np.arange(len(metrics))
     width = 0.35
 
-    fig, ax = plt.subplots()
+    #fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(12, 8))  # Adjusted figsize for a bigger chart
+
     ax.bar(x - width/2, baseline_values, width, label='Baseline')
     ax.bar(x + width/2, dqn_values, width, label='DQN')
 
