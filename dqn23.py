@@ -232,12 +232,12 @@ def plot_metrics(baseline_metrics, dqn_metrics):
     ax.bar(x - width/2, baseline_values, width, label='Baseline')
     ax.bar(x + width/2, dqn_values, width, label='DQN')
 
-    ax.set_xlabel('Metrics')
-    ax.set_ylabel('Values')
-    ax.set_title('Performance Metrics Comparison')
+    ax.set_xlabel('Metrics', fontsize=18)
+    ax.set_ylabel('Values', fontsize=18)
+    ax.set_title('Performance Metrics Comparison', fontsize=18)
     ax.set_xticks(x)
-    ax.set_xticklabels(metrics)
-    ax.legend()
+    ax.set_xticklabels(metrics, fontsize=18)
+    ax.legend(fontsize=18)
 
     plt.show()
 
