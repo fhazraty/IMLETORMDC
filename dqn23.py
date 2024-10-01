@@ -7,17 +7,20 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow.keras import layers
 
+# Define the DQN class for managing Deep Q-Network operations
 class DQN:
     def __init__(self, state_size, action_size):
+        # Initialize state size, action size, and other parameters
         self.state_size = state_size
         self.action_size = action_size
-        self.memory = []
-        self.gamma = 0.95  # discount rate
-        self.epsilon = 1.0  # exploration rate
+        self.memory = [] # Store previous experiences
+        self.gamma = 0.95  # Discount rate for future rewards
+        self.epsilon = 1.0  # Exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.995
-        self.model = self._build_model()
+        self.model = self._build_model() # Build the neural network model
 
+    # Build the neural network model using TensorFlow/Keras
     def _build_model(self):
         model = tf.keras.Sequential()
         model.add(layers.Dense(24, input_dim=self.state_size, activation='relu'))
@@ -26,27 +29,33 @@ class DQN:
         model.compile(loss='mse', optimizer=tf.keras.optimizers.Adam(learning_rate=0.001))
         return model
 
+    # Store an experience tuple in memory (state, action, reward, next_state, done)
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
     
+    # Decide whether to explore or exploit based on epsilon value
     def act(self, state):
         if np.random.rand() <= self.epsilon:
-            return np.random.randint(self.action_size)
-        act_values = self.model.predict(state)
+            return np.random.randint(self.action_size) # Explore: random action
+        act_values = self.model.predict(state) # Exploit: use the model
         return np.argmax(act_values[0])
 
+     # Train the model based on a batch of experiences
     def replay(self, batch_size):
         minibatch = np.random.choice(self.memory, batch_size)
         for state, action, reward, next_state, done in minibatch:
             target = reward
             if not done:
+                # If not done, estimate future rewards and discount
                 target = (reward + self.gamma * np.amax(self.model.predict(next_state)[0]))
             target_f = self.model.predict(state)
             target_f[0][action] = target
             self.model.fit(state, target_f, epochs=1, verbose=0)
         if self.epsilon > self.epsilon_min:
+            # Decay epsilon after each replay
             self.epsilon *= self.epsilon_decay
 
+# Placeholder for EdgeNode class managing edge resources
 class EdgeNode:
     def __init__(self, cpu_capacity, memory_capacity):
         self.cpu_capacity = cpu_capacity
@@ -218,6 +227,7 @@ def calculate_reward(edge_layer, fog_layer, cloud_layer):
 def check_done_condition():
     return False
 
+# Plot comparison between baseline and DQN metrics
 def plot_metrics(baseline_metrics, dqn_metrics):
     metrics = ['average_latency', 'average_cpu_utilization', 'average_memory_utilization']
     baseline_values = [baseline_metrics[metric] for metric in metrics]
@@ -229,9 +239,11 @@ def plot_metrics(baseline_metrics, dqn_metrics):
     #fig, ax = plt.subplots()
     fig, ax = plt.subplots(figsize=(12, 8))  # Adjusted figsize for a bigger chart
 
+    # Plot bars for baseline and DQN metrics
     ax.bar(x - width/2, baseline_values, width, label='Baseline')
     ax.bar(x + width/2, dqn_values, width, label='DQN')
 
+    # Set labels, title, and legend
     ax.set_xlabel('Metrics', fontsize=18)
     ax.set_ylabel('Values', fontsize=18)
     ax.set_title('Performance Metrics Comparison', fontsize=18)
@@ -241,7 +253,7 @@ def plot_metrics(baseline_metrics, dqn_metrics):
 
     plt.show()
 
-    # Simulate Task Arrival for DQN
+# Simulate task arrival and offloading using DQN strategy
 def simulate_dqn():
     with open('/content/drive/MyDrive/Colab Notebooks/data.csv', 'r') as file:
         csv_reader = csv.reader(file)
@@ -249,6 +261,7 @@ def simulate_dqn():
 
         for line_number, row in enumerate(csv_reader, start=2):
             try:
+                # Extract task CPU and memory usage from CSV row
                 task_cpu_usage = float(row[0])
                 task_memory_usage = float(row[1])
                 task = Task(cpu_usage=task_cpu_usage, memory_usage=task_memory_usage)
@@ -257,14 +270,14 @@ def simulate_dqn():
                 print(f"Error: Unable to extract CPU and memory usage from row {line_number}. Skipping row. Error: {e}")
                 continue
 
-# Baseline simulation
+# Initialize layers and perform baseline and DQN simulation
 edge_layer = EdgeLayer(num_nodes=3, max_queue_size=10)
 fog_layer = FogLayer(num_nodes=2, max_queue_size=20)
 cloud_layer = CloudLayer(num_nodes=1, max_queue_size=30)
 simulate_baseline()
 baseline_metrics = calculate_average_metrics()
 
-# DQN simulation
+# Initialize the DQN agent and perform DQN-based simulation
 edge_layer = EdgeLayer(num_nodes=3, max_queue_size=10)
 fog_layer = FogLayer(num_nodes=2, max_queue_size=20)
 cloud_layer = CloudLayer(num_nodes=1, max_queue_size=30)
@@ -275,5 +288,5 @@ state = get_state(edge_layer, fog_layer, cloud_layer)
 simulate_dqn()
 dqn_metrics = calculate_average_metrics()
 
-# Plot metrics
+# Plot the comparison of baseline and DQN metrics
 plot_metrics(baseline_metrics, dqn_metrics)
