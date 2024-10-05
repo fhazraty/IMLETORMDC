@@ -176,7 +176,7 @@ def offload_task_baseline(task, edge_layer, fog_layer, cloud_layer):
             return
 
 def simulate_baseline():
-    with open('/content/drive/MyDrive/Colab Notebooks/data.csv', 'r') as file:
+    with open('/content/data.csv', 'r') as file:
         csv_reader = csv.reader(file)
         next(csv_reader)
 
@@ -255,7 +255,7 @@ def plot_metrics(baseline_metrics, dqn_metrics):
 
 # Simulate task arrival and offloading using DQN strategy
 def simulate_dqn():
-    with open('/content/drive/MyDrive/Colab Notebooks/data.csv', 'r') as file:
+    with open('/content/data.csv', 'r') as file:
         csv_reader = csv.reader(file)
         next(csv_reader)
 
